@@ -12,7 +12,23 @@ namespace {
 void get_URL( const string& host, const string& path )
 {
   debug( "Function called: get_URL( \"{}\", \"{}\" )", host, path );
-  debug( "get_URL() function not yet implemented" );
+  // debug( "get_URL() function not yet implemented" );
+
+  // 1. Create tcp socket.
+  TCPSocket sock;
+
+  // 2. Connect to target address
+  sock.connect({host, "http"});
+
+  // 3. Send request
+  sock.write_all(format("GET {} HTTP/1.1\r\nHost: {}\r\nConnection: close\r\n\r\n", path, host));
+
+  // 4. Recv response
+  do {
+    string chunk;
+    sock.read(chunk);
+    cout << chunk;
+  } while (!sock.eof());
 }
 } // namespace
 
