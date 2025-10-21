@@ -1,9 +1,9 @@
 #pragma once
 
+#include <algorithm>
 #include <cstdint>
 #include <string>
 #include <string_view>
-#include <algorithm>
 
 class Reader;
 class Writer;
@@ -25,11 +25,11 @@ public:
 protected:
   // Please add any additional state to the ByteStream here, and not to the Writer and Reader interfaces.
   uint64_t capacity_;
-  bool error_ {false};
-  std::string buffer_{};
-  uint64_t bytes_pushed_{0};
-  uint64_t bytes_popped_{0};
-  bool is_closed_{false};
+  bool error_ { false };
+  std::string buffer_ {};
+  uint64_t bytes_pushed_ { 0 };
+  uint64_t bytes_popped_ { 0 };
+  bool is_closed_ { false };
 };
 
 class Writer : public ByteStream
