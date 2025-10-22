@@ -14,8 +14,8 @@ void Writer::push( string data )
   // Your code here (and in each method below)
   // debug( "Writer::push({}) not yet implemented", data );
 
-  uint64_t curr_len = buffer_.size();
-  uint64_t add_len = data.size();
+  const uint64_t curr_len = buffer_.size();
+  const uint64_t add_len = data.size();
   if ( curr_len + add_len > capacity_ ) {
     buffer_ += data.substr( 0, capacity_ - curr_len );
   } else {
@@ -66,7 +66,7 @@ string_view Reader::peek() const
 void Reader::pop( uint64_t len )
 {
   // debug( "Reader::pop({}) not yet implemented", len );
-  uint64_t curr_len = buffer_.size();
+  const uint64_t curr_len = buffer_.size();
   if ( len > curr_len ) {
     buffer_ = "";
   } else {
@@ -79,7 +79,7 @@ void Reader::pop( uint64_t len )
 bool Reader::is_finished() const
 {
   // debug( "Reader::is_finished() not yet implemented" );
-  return is_closed_ && buffer_.size() == 0;
+  return is_closed_ && buffer_.empty();
 }
 
 // Number of bytes currently buffered (pushed and not popped)

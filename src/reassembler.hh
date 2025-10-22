@@ -1,12 +1,19 @@
 #pragma once
 
 #include "byte_stream.hh"
+#include <vector>
+#include <iostream>
+#include <algorithm>
+#include <unordered_map>
 
 class Reassembler
 {
 public:
   // Construct Reassembler to write into given ByteStream.
-  explicit Reassembler( ByteStream&& output ) : output_( std::move( output ) ) {}
+  explicit Reassembler( ByteStream&& output ) : output_( std::move( output ) ),
+                                                capacity_( output_.writer().available_capacity() + 1 ), 
+                                                buffer_(capacity_), 
+                                                bitmap_( ( capacity_ + 63 ) / 64 ) {}
 
   /*
    * Insert a new substring to be reassembled into a ByteStream.
@@ -42,5 +49,16 @@ public:
   const Writer& writer() const { return output_.writer(); }
 
 private:
+  void store( const std::string &data, const uint64_t offset, const uint64_t start, const uint64_t end );
+  void write( const uint64_t start, uint64_t end );
+  void forward();
+
   ByteStream output_;
+  uint64_t capacity_;
+  uint64_t next_byte_{0};
+  uint64_t last_byte_{0};
+  uint64_t curr_{0};
+  std::vector<char> buffer_;
+  std::vector<uint64_t> bitmap_; 
+  bool has_last_substring_{false};
 };
