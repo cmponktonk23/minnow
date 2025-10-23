@@ -1,90 +1,102 @@
 #include "reassembler.hh"
 #include "debug.hh"
 
-using namespace std;
-
 void Reassembler::insert( uint64_t first_index, string data, bool is_last_substring )
 {
   // debug( "unimplemented insert({}, {}, {}) called", first_index, data, is_last_substring );
   auto &writer = output_.writer();
 
-  // Record last byte
+  // Record last byte index
   if (is_last_substring) {
     has_last_substring_ = true;
-    last_byte_ = first_index + data.size();
+    last_index_ = first_index + data.size();
   }
 
-  uint64_t l1 = next_byte_;
-  uint64_t r1 = next_byte_ + writer.available_capacity();
+  // Truncate segment by available capacity
+  uint64_t l1 = first_unassembled_index_;
+  uint64_t r1 = first_unassembled_index_ + writer.available_capacity();
   uint64_t l2 = first_index;
   uint64_t r2 = first_index + data.size();
-
   uint64_t l = max(l1, l2);
   uint64_t r = min(r1, r2);
-  if (r > l) {
-    store(data, l - next_byte_, l - first_index, r - first_index);
+  if (r >= l) {
+    auto substring = data.substr( l - first_index, r - l );
+    insert( l, substring );
   }
 
-  // Move forward
-  forward();
+  // Write to byte stream
+  if ( !lst_.empty() && lst_.begin()->first_index_ == first_unassembled_index_ ) {
+    writer.push( lst_.begin()->data_ );
+    first_unassembled_index_ = lst_.begin()->first_index_ + lst_.begin()->data_.size();
+    rbtree_.erase( lst_.begin()->first_index_ );
+    lst_.erase( lst_.begin() );
+  }
 
   // When next byte == last byte then finish
-  if (has_last_substring_ && next_byte_ == last_byte_) {
+  if ( first_unassembled_index_ == last_index_ && has_last_substring_ ) {
     writer.close();
   }
 }
 
-void Reassembler::store(const string &data, uint64_t offset, uint64_t start, uint64_t end)
+void Reassembler::insert( const uint64_t first_index, const string data )
 {
-  if (start >= end) return;
-
-  auto substring = data.substr(start, end - start);
-  uint64_t pos = (curr_ + offset) % capacity_;
-  for (char c : substring) {
-    buffer_[pos] = c;
-    uint64_t x = pos / 64;
-    uint64_t y = pos % 64;
-    bitmap_[x] |= ((uint64_t)1 << y);
-    pos = (pos + 1) % capacity_;
+  // Put first node into rbtree and list
+  if (rbtree_.empty()) {
+    lst_.push_back( { first_index, data } );
+    rbtree_[first_index] = lst_.begin();
+    return;
   }
-}
 
-void Reassembler::forward()
-{
-  uint64_t old_pos = curr_;
-  while(1) {
-    uint64_t x = curr_ / 64;
-    uint64_t y = curr_ % 64;
-    uint64_t bits = bitmap_[x];
-    uint64_t rev = ~(bits >> y);
-    uint64_t cnt;
-    if (rev == 0) {
-      cnt = 64;
+  // Find the first node->first_index >= first_index
+  auto it = rbtree_.lower_bound( first_index );
+  if ( it != rbtree_.end() ) {
+    debug( "lower_bound {}", it->first );
+    // Need to merge current segment with the target node because they have same first_index, map can only save unique key
+    if ( it->first == first_index ) {
+      if ( it->second->data_.size() < data.size() ) {
+        it->second->data_ = data;
+      }
     } else {
-      cnt = __builtin_ctzll(rev);
+      rbtree_[first_index] = lst_.insert( it->second, { first_index, data } );
     }
-    next_byte_ += cnt;
-    curr_ = (curr_ + cnt) % capacity_;
-    if (cnt < 64) {
-      bitmap_[x] ^= ((((uint64_t)1 << cnt) - 1) << y);
-    } else {
-      bitmap_[x] = 0;
-    }
-    if ( cnt != 64 - (curr_ == 0 ? 64 - capacity_ % 64 : 0) - y ) break;
-  }
-  write(old_pos, curr_);
-}
-
-void Reassembler::write(uint64_t start, uint64_t end) {
-  if (start == end) return;
-  auto &writer = output_.writer();
-  string data;
-  if (start < end) {
-    data = string(buffer_.begin() + start, buffer_.begin() + end);
   } else {
-    data = string(buffer_.begin() + start, buffer_.end()) + string(buffer_.begin(), buffer_.begin() + end);
+    lst_.push_back( { first_index, data });
+    rbtree_[first_index] = prev(lst_.end());
   }
-  writer.push( data );
+  
+  debug( " lst_.size() {} ", lst_.size() );
+
+  auto start = rbtree_[first_index];
+
+  if ( start != lst_.begin() && prev(start)->first_index_ + prev(start)->data_.size() >= first_index ) {
+    start = prev(start);
+  }
+
+  merge( start );
+}
+
+void Reassembler::merge( list<Segment>::iterator node )
+{
+  if ( node == lst_.end() ) return;
+
+  debug( "start {}", node->first_index_);
+
+  auto next_node = next(node);
+  while ( next_node != lst_.end() ) {
+    uint64_t r1 = node->first_index_ + node->data_.size() - 1;
+    uint64_t l2 = next_node->first_index_;
+
+    if ( r1 + 1 >= l2 ) {
+      if ( r1 < next_node->first_index_ + next_node->data_.size() - 1 ) {
+        node->data_ += next_node->data_.substr(r1 - l2 + 1, next_node->data_.size() - (r1 - l2 + 1));
+      }
+      rbtree_.erase(next_node->first_index_);
+      lst_.erase(next_node);
+      next_node = next(node);
+    } else {
+      break;
+    }
+  }
 }
 
 // How many bytes are stored in the Reassembler itself?
@@ -92,12 +104,10 @@ void Reassembler::write(uint64_t start, uint64_t end) {
 uint64_t Reassembler::count_bytes_pending() const
 {
   // debug( "unimplemented count_bytes_pending() called" );
-  uint64_t ones = 0;
-  for ( auto bits : bitmap_ ) {
-    while ( bits > 0 ) {
-      bits &= (bits - 1);
-      ++ones;
-    }
+  
+  uint64_t cnt = 0;
+  for (auto it = lst_.begin(); it != lst_.end(); it = next(it)) {
+    cnt += it->data_.size();
   }
-  return ones;
+  return cnt;
 }

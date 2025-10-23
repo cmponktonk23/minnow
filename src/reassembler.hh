@@ -4,16 +4,25 @@
 #include <vector>
 #include <iostream>
 #include <algorithm>
-#include <unordered_map>
+#include <map>
+#include <list>
+#include <string>
+#include <cassert>
+
+using namespace std;
 
 class Reassembler
 {
 public:
+  struct Segment
+  {
+  public:
+    uint64_t first_index_;
+    string data_;
+  };
+
   // Construct Reassembler to write into given ByteStream.
-  explicit Reassembler( ByteStream&& output ) : output_( std::move( output ) ),
-                                                capacity_( output_.writer().available_capacity() + 1 ), 
-                                                buffer_(capacity_), 
-                                                bitmap_( ( capacity_ + 63 ) / 64 ) {}
+  explicit Reassembler( ByteStream&& output ) : output_( move( output ) ) {}
 
   /*
    * Insert a new substring to be reassembled into a ByteStream.
@@ -35,7 +44,7 @@ public:
    *
    * The Reassembler should close the stream after writing the last byte.
    */
-  void insert( uint64_t first_index, std::string data, bool is_last_substring );
+  void insert( uint64_t first_index, string data, bool is_last_substring );
 
   // How many bytes are stored in the Reassembler itself?
   // This function is for testing only; don't add extra state to support it.
@@ -49,16 +58,13 @@ public:
   const Writer& writer() const { return output_.writer(); }
 
 private:
-  void store( const std::string &data, const uint64_t offset, const uint64_t start, const uint64_t end );
-  void write( const uint64_t start, uint64_t end );
-  void forward();
+  void insert( const uint64_t first_index, const string data );
+  void merge( list<Segment>::iterator node );
 
   ByteStream output_;
-  uint64_t capacity_;
-  uint64_t next_byte_{0};
-  uint64_t last_byte_{0};
-  uint64_t curr_{0};
-  std::vector<char> buffer_;
-  std::vector<uint64_t> bitmap_; 
+  uint64_t first_unassembled_index_{0};
+  uint64_t last_index_{0};
   bool has_last_substring_{false};
+  map<uint64_t, list<Segment>::iterator> rbtree_{};
+  list<Segment> lst_{};
 };
