@@ -19,7 +19,7 @@ void Reassembler::insert( uint64_t first_index, string data, bool is_last_substr
   uint64_t r2 = first_index + data.size();
   uint64_t l = max(l1, l2);
   uint64_t r = min(r1, r2);
-  if (r >= l) {
+  if (r > l) {
     auto substring = data.substr( l - first_index, r - l );
     insert( l, substring );
   }
@@ -50,7 +50,6 @@ void Reassembler::insert( const uint64_t first_index, const string data )
   // Find the first node->first_index >= first_index
   auto it = rbtree_.lower_bound( first_index );
   if ( it != rbtree_.end() ) {
-    debug( "lower_bound {}", it->first );
     // Need to merge current segment with the target node because they have same first_index, map can only save unique key
     if ( it->first == first_index ) {
       if ( it->second->data_.size() < data.size() ) {
@@ -64,8 +63,6 @@ void Reassembler::insert( const uint64_t first_index, const string data )
     rbtree_[first_index] = prev(lst_.end());
   }
   
-  debug( " lst_.size() {} ", lst_.size() );
-
   auto start = rbtree_[first_index];
 
   if ( start != lst_.begin() && prev(start)->first_index_ + prev(start)->data_.size() >= first_index ) {
@@ -78,8 +75,6 @@ void Reassembler::insert( const uint64_t first_index, const string data )
 void Reassembler::merge( list<Segment>::iterator node )
 {
   if ( node == lst_.end() ) return;
-
-  debug( "start {}", node->first_index_);
 
   auto next_node = next(node);
   while ( next_node != lst_.end() ) {
