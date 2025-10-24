@@ -1,13 +1,13 @@
 #pragma once
 
 #include "byte_stream.hh"
-#include <vector>
-#include <iostream>
 #include <algorithm>
-#include <map>
-#include <list>
-#include <string>
 #include <cassert>
+#include <iostream>
+#include <list>
+#include <map>
+#include <string>
+#include <vector>
 
 using namespace std;
 
@@ -64,9 +64,9 @@ private:
   void merge( list<Segment>::iterator node );
 
   ByteStream output_;
-  uint64_t first_unassembled_index_{0};
-  uint64_t last_index_{0};
-  bool has_last_substring_{false};
-  map<uint64_t, list<Segment>::iterator> rbtree_{};
-  list<Segment> lst_{};
+  uint64_t first_unassembled_index_ { 0 };
+  uint64_t last_index_ { 0 };
+  bool has_last_substring_ { false };
+  map<uint64_t, list<Segment>::iterator> rbtree_ {};
+  list<Segment> lst_ {};
 };

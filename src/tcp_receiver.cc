@@ -11,13 +11,13 @@ void TCPReceiver::receive( TCPSenderMessage message )
     reassembler_.reader().set_error();
     return;
   }
-  
+
   if ( message.SYN ) {
     isn_ = message.seqno;
   }
 
-  uint64_t stream_index = message.seqno.unwrap(*isn_, reassembler_.next_byte()) - (!message.SYN);
-  reassembler_.insert(stream_index, message.payload, message.FIN);
+  uint64_t stream_index = message.seqno.unwrap( *isn_, reassembler_.next_byte() ) - ( !message.SYN );
+  reassembler_.insert( stream_index, message.payload, message.FIN );
 }
 
 TCPReceiverMessage TCPReceiver::send() const
@@ -35,9 +35,5 @@ TCPReceiverMessage TCPReceiver::send() const
     wnd_size = 65535;
   }
 
-  return { 
-      ackno,
-      static_cast<uint16_t>(wnd_size), 
-      reassembler_.writer().has_error()
-  };
+  return { ackno, static_cast<uint16_t>( wnd_size ), reassembler_.writer().has_error() };
 }
