@@ -57,6 +57,8 @@ public:
   // Access output stream writer, but const-only (can't write from outside)
   const Writer& writer() const { return output_.writer(); }
 
+  uint64_t next_byte() const { return first_unassembled_index_; }
+
 private:
   void insert( const uint64_t first_index, const string data );
   void merge( list<Segment>::iterator node );

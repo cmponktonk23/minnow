@@ -32,6 +32,8 @@ void Reassembler::insert( uint64_t first_index, string data, bool is_last_substr
     lst_.erase( lst_.begin() );
   }
 
+  debug("first_unassembled_index_ {} first_index {}", first_unassembled_index_, first_index);
+
   // When next byte == last byte then finish
   if ( first_unassembled_index_ == last_index_ && has_last_substring_ ) {
     writer.close();
