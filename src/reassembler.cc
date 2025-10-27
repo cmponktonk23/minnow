@@ -44,7 +44,7 @@ void Reassembler::insert( const uint64_t first_index, const string data )
 {
   // Put first node into rbtree and list
   if ( rbtree_.empty() ) {
-    lst_.push_back( { first_index, data } );
+    lst_.push_back( { first_index, false, false, data } );
     rbtree_[first_index] = lst_.begin();
     return;
   }
@@ -59,10 +59,10 @@ void Reassembler::insert( const uint64_t first_index, const string data )
         it->second->data_ = data;
       }
     } else {
-      rbtree_[first_index] = lst_.insert( it->second, { first_index, data } );
+      rbtree_[first_index] = lst_.insert( it->second, { first_index, false, false, data } );
     }
   } else {
-    lst_.push_back( { first_index, data } );
+    lst_.push_back( { first_index, false, false, data } );
     rbtree_[first_index] = prev( lst_.end() );
   }
 

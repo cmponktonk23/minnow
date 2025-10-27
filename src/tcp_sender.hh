@@ -44,9 +44,15 @@ private:
   ByteStream input_;
   Wrap32 isn_;
   uint64_t initial_RTO_ms_;
+  uint64_t RTO_ms_{0};
+  bool RTO_timer_start_{false};
+  uint64_t RTO_timer_{0};
   uint64_t abs_seqno_{0};
   uint64_t abs_ackno_{0};
   list<Segment> outstanding_{};
   uint16_t rwnd_{1};
   bool first_msg_{true};
+  uint64_t sequence_number_in_flight_{0};
+  uint64_t consecutive_retransmissions_{0};
+  bool is_finished_{false};
 };
