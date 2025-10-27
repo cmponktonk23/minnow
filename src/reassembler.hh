@@ -1,6 +1,7 @@
 #pragma once
 
 #include "byte_stream.hh"
+#include "segment.hh"
 #include <algorithm>
 #include <cassert>
 #include <iostream>
@@ -14,13 +15,6 @@ using namespace std;
 class Reassembler
 {
 public:
-  struct Segment
-  {
-  public:
-    uint64_t first_index_;
-    string data_;
-  };
-
   // Construct Reassembler to write into given ByteStream.
   explicit Reassembler( ByteStream&& output ) : output_( move( output ) ) {}
 

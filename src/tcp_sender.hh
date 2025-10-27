@@ -1,10 +1,12 @@
 #pragma once
 
+#include "segment.hh"
 #include "byte_stream.hh"
 #include "tcp_receiver_message.hh"
 #include "tcp_sender_message.hh"
 
 #include <functional>
+#include <list>
 
 class TCPSender
 {
@@ -42,4 +44,9 @@ private:
   ByteStream input_;
   Wrap32 isn_;
   uint64_t initial_RTO_ms_;
+  uint64_t abs_seqno_{0};
+  uint64_t abs_ackno_{0};
+  list<Segment> outstanding_{};
+  uint16_t rwnd_{1};
+  bool first_msg_{true};
 };

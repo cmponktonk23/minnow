@@ -58,14 +58,12 @@ uint64_t Writer::bytes_pushed() const
 // the caller to do a lot of extra work.
 string_view Reader::peek() const
 {
-  // debug( "Reader::peek() not yet implemented" );
   return buffer_;
 }
 
 // Remove `len` bytes from the buffer.
 void Reader::pop( uint64_t len )
 {
-  // debug( "Reader::pop({}) not yet implemented", len );
   const uint64_t curr_len = buffer_.size();
   if ( len > curr_len ) {
     buffer_ = "";
