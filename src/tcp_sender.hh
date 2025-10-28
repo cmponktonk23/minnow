@@ -54,5 +54,5 @@ private:
   bool first_msg_{true};
   uint64_t sequence_number_in_flight_{0};
   uint64_t consecutive_retransmissions_{0};
-  bool is_finished_{false};
+  bool is_finished_{false};   // 标识是否已经发送过FIN
 };

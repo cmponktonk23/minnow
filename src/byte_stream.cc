@@ -57,13 +57,13 @@ string_view Reader::peek() const
 // Remove `len` bytes from the buffer.
 void Reader::pop( uint64_t len )
 {
-  const uint64_t curr_len = buffer_.size();
-  if ( len > curr_len ) {
-    buffer_ = "";
-  } else {
-    buffer_ = buffer_.substr( len, curr_len - len );
-  }
-  bytes_popped_ += min( curr_len, len );
+  bytes_popped_ += min( buffer_.size(), len );
+
+  /**
+   * 1. erase操作可以不担心len是否比buffer更长
+   * 2. 性能优化：不改变buffer的capacity，防止重新分配内存
+   */
+  buffer_.erase(0, len);
 }
 
 // Is the stream finished (closed and fully popped)?
