@@ -5,8 +5,6 @@ using namespace std;
 
 void TCPReceiver::receive( TCPSenderMessage message )
 {
-  // Your code here.
-  // debug( "unimplemented receive() called" );
   if ( message.RST ) {
     reassembler_.reader().set_error();
     return;
@@ -23,10 +21,8 @@ void TCPReceiver::receive( TCPSenderMessage message )
 TCPReceiverMessage TCPReceiver::send() const
 {
   // Your code here.
-  // debug( "unimplemented send() called" );
   std::optional<Wrap32> ackno = std::nullopt;
   if ( isn_ ) {
-    debug( "next_byte {} ", reassembler_.next_byte() );
     ackno = Wrap32::wrap( reassembler_.next_byte() + 1 + reassembler_.writer().is_closed(), *isn_ );
   }
 

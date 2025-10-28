@@ -11,9 +11,6 @@ using namespace std;
 namespace {
 void get_URL( const string& host, const string& path )
 {
-  debug( "Function called: get_URL( \"{}\", \"{}\" )", host, path );
-  // debug( "get_URL() function not yet implemented" );
-
   // 1. Create tcp socket.
   TCPSocket sock;
 

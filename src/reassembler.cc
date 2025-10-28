@@ -3,7 +3,6 @@
 
 void Reassembler::insert( uint64_t first_index, string data, bool is_last_substring )
 {
-  // debug( "unimplemented insert({}, {}, {}) called", first_index, data, is_last_substring );
   auto& writer = output_.writer();
 
   // Record last byte index
@@ -31,8 +30,6 @@ void Reassembler::insert( uint64_t first_index, string data, bool is_last_substr
     rbtree_.erase( lst_.begin()->first_index_ );
     lst_.erase( lst_.begin() );
   }
-
-  debug( "first_unassembled_index_ {} first_index {}", first_unassembled_index_, first_index );
 
   // When next byte == last byte then finish
   if ( first_unassembled_index_ == last_index_ && has_last_substring_ ) {
@@ -102,8 +99,6 @@ void Reassembler::merge( list<Segment>::iterator node )
 // This function is for testing only; don't add extra state to support it.
 uint64_t Reassembler::count_bytes_pending() const
 {
-  // debug( "unimplemented count_bytes_pending() called" );
-
   uint64_t cnt = 0;
   for ( auto it = lst_.begin(); it != lst_.end(); it = next( it ) ) {
     cnt += it->data_.size();
