@@ -1,5 +1,6 @@
 #include "debug.hh"
-#include "socket.hh"
+// #include "socket.hh"
+#include "tcp_minnow_socket.hh"
 
 #include <cstdlib>
 #include <iostream>
@@ -12,7 +13,8 @@ namespace {
 void get_URL( const string& host, const string& path )
 {
   // 1. Create tcp socket.
-  TCPSocket sock;
+  // TCPSocket sock;
+  CS144TCPSocket sock;
 
   // 2. Connect to target address
   sock.connect( { host, "http" } );
@@ -26,6 +28,8 @@ void get_URL( const string& host, const string& path )
     sock.read( chunk );
     cout << chunk;
   } while ( !sock.eof() );
+
+  sock.wait_until_closed();
 }
 } // namespace
 
