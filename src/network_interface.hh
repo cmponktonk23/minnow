@@ -6,6 +6,7 @@
 
 #include <memory>
 #include <queue>
+#include <unordered_map>
 
 // A "network interface" that connects IP (the internet layer, or network layer)
 // with Ethernet (the network access layer, or link layer).
@@ -67,6 +68,9 @@ public:
   std::queue<InternetDatagram>& datagrams_received() { return datagrams_received_; }
 
 private:
+  void send_datagram_frame( const InternetDatagram& dgram, const EthernetAddress& dst_ethernet_address );
+  void send_arp_frame( const ARPMessage& arp, const EthernetAddress& dst_ethernet_address = ETHERNET_BROADCAST );
+
   // Human-readable name of the interface
   std::string name_;
 
@@ -82,4 +86,8 @@ private:
 
   // Datagrams that have been received
   std::queue<InternetDatagram> datagrams_received_ {};
+
+  std::unordered_map<uint32_t, std::pair<int64_t, EthernetAddress>> ip_to_ethernet_{};
+
+  std::unordered_map<uint32_t, std::pair<int64_t, std::vector<std::pair<int64_t, InternetDatagram>>>> ip_to_dgrams_{};
 };
