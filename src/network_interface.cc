@@ -76,8 +76,10 @@ void NetworkInterface::recv_frame( EthernetFrame frame )
     // Learn mappings from both requests and replies
     ip_to_ethernet_[arp.sender_ip_address] = { 0, arp.sender_ethernet_address };
 
-    // Everytime a host learn a mapping, check to send the pending datagrams. (Even if it's not the target host.)
-    // ARP reply msg is also covered here!
+    /**
+     * Bug: Everytime a host learn a mapping, check to send the pending datagrams. (Even if it's not the target host.)
+     * ARP reply msg is also covered here!
+     */
     auto it = ip_to_dgrams_.find(arp.sender_ip_address);
     if ( it != ip_to_dgrams_.end() ) {
       for (auto &ts_dgram : it->second.dgramq) {
@@ -89,6 +91,9 @@ void NetworkInterface::recv_frame( EthernetFrame frame )
     auto ip = ip_address_.ipv4_numeric();
     // Reply to an ARP request only if current host is the target.
     if ( arp.opcode == ARPMessage::OPCODE_REQUEST && arp.target_ip_address == ip ) {
+      /**
+        * Bug: Sender is always current host and target is always the destination host for both request and reply ARP msg.
+        */
       auto arp_reply = make_arp( ARPMessage::OPCODE_REPLY, ethernet_address_, ip, arp.sender_ethernet_address, arp.sender_ip_address );
       send_arp_frame( arp_reply, arp.sender_ethernet_address );
     }
@@ -117,6 +122,9 @@ void NetworkInterface::tick( const size_t ms_since_last_tick )
       if ( ts_dgramq.ts >= NetworkInterface::ARP_RESEND_TIMEOUT ) {
         ts_dgramq.ts = -1;
       }
+      /**
+       * Bug: Drop pending datagrams after enqueue for 5s.
+       */
       auto &dgramq = ts_dgramq.dgramq;
       for ( size_t i = 0; i < dgramq.size(); ++i ) {
         dgramq[i].ts += ms_since_last_tick;
