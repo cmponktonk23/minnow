@@ -89,6 +89,9 @@ private:
     std::vector<DatagramWithTimeout> dgramq{};
   };
 
+  static uint16_t MAPPING_CACHE_DURATION = 30000;
+  static uint16_t ARP_RESEND_TIMEOUT = 5000;
+
   // Human-readable name of the interface
   std::string name_;
 
@@ -105,7 +108,14 @@ private:
   // Datagrams that have been received
   std::queue<InternetDatagram> datagrams_received_ {};
 
+  /**
+   * Only cache each mapping for 30s.
+   */
   std::unordered_map<uint32_t, EthernetAddressWithTimeout> ip_to_ethernet_{};
 
+  /**
+   * The first timestamp is used to record the timeout (5s) to re-send the APR.
+   * The second timestamp is used to record the timeout (5s) to drop the pending datagram.
+   */
   std::unordered_map<uint32_t, DatagramQueueWithTimeout> ip_to_dgrams_{};
 };

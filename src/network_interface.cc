@@ -102,7 +102,7 @@ void NetworkInterface::tick( const size_t ms_since_last_tick )
   for ( auto it = ip_to_ethernet_.begin(); it != ip_to_ethernet_.end(); ) {
     auto& ts_ethernet = it->second;
     ts_ethernet.ts += ms_since_last_tick;
-    if ( ts_ethernet.ts >= 30000 ) {
+    if ( ts_ethernet.ts >= NetworkInterface::MAPPING_CACHE_DURATION ) {
       it = ip_to_ethernet_.erase(it);
     } else {
       it = next(it);
@@ -114,13 +114,13 @@ void NetworkInterface::tick( const size_t ms_since_last_tick )
     auto& ts_dgramq = it->second;
     if ( ts_dgramq.ts != -1 ) {
       ts_dgramq.ts += ms_since_last_tick;
-      if ( ts_dgramq.ts >= 5000 ) {
+      if ( ts_dgramq.ts >= NetworkInterface::ARP_RESEND_TIMEOUT ) {
         ts_dgramq.ts = -1;
       }
       auto &dgramq = ts_dgramq.dgramq;
       for ( size_t i = 0; i < dgramq.size(); ++i ) {
         dgramq[i].ts += ms_since_last_tick;
-        if ( dgramq[i].ts >= 5000 ) {
+        if ( dgramq[i].ts >= NetworkInterface::ARP_RESEND_TIMEOUT ) {
           swap(dgramq[i], dgramq.back());
           dgramq.pop_back();
         }
