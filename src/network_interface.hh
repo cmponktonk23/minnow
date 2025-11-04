@@ -1,5 +1,6 @@
 #pragma once
 
+#include "arp_message.hh"
 #include "address.hh"
 #include "ethernet_frame.hh"
 #include "ipv4_datagram.hh"

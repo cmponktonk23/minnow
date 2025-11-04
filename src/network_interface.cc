@@ -1,6 +1,5 @@
 #include <iostream>
 
-#include "arp_message.hh"
 #include "debug.hh"
 #include "ethernet_frame.hh"
 #include "exception.hh"
