@@ -32,6 +32,17 @@ public:
   void route();
 
 private:
+  struct Rule {
+    uint32_t route_prefix{};
+    uint8_t prefix_length{};
+    std::optional<Address> next_hop{};
+    size_t interface_num{};
+  };
+
+  auto match( const Rule& rule, const uint32_t ip ) -> bool;
+
   // The router's collection of network interfaces
   std::vector<std::shared_ptr<NetworkInterface>> interfaces_ {};
+
+  std::vector<Rule> route_table_{};
 };
