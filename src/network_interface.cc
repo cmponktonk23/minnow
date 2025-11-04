@@ -143,7 +143,7 @@ auto NetworkInterface::make_arp(
   const uint32_t sender_ip_address,
   const EthernetAddress& target_ethernet_address,
   const uint32_t target_ip_address
-) -> ARPMessage {
+) const -> ARPMessage {
   ARPMessage arp;
   arp.opcode = opcode;
   arp.sender_ethernet_address = sender_ethernet_address;
@@ -153,7 +153,7 @@ auto NetworkInterface::make_arp(
   return arp;
 }
 
-void NetworkInterface::send_datagram_frame( const InternetDatagram& dgram, const EthernetAddress& dst_ethernet_address )
+void NetworkInterface::send_datagram_frame( const InternetDatagram& dgram, const EthernetAddress& dst_ethernet_address ) const
 {
   EthernetHeader header{ dst_ethernet_address, ethernet_address_, EthernetHeader::TYPE_IPv4 };
   
@@ -166,7 +166,7 @@ void NetworkInterface::send_datagram_frame( const InternetDatagram& dgram, const
   transmit( frame );
 }
 
-void NetworkInterface::send_arp_frame( const ARPMessage& arp, const EthernetAddress& dst_ethernet_address )
+void NetworkInterface::send_arp_frame( const ARPMessage& arp, const EthernetAddress& dst_ethernet_address ) const
 {
   EthernetHeader header{ dst_ethernet_address, ethernet_address_, EthernetHeader::TYPE_ARP };
 

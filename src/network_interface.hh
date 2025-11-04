@@ -68,11 +68,11 @@ public:
   std::queue<InternetDatagram>& datagrams_received() { return datagrams_received_; }
 
 private:
-  void send_datagram_frame( const InternetDatagram& dgram, const EthernetAddress& dst_ethernet_address );
-  void send_arp_frame( const ARPMessage& arp, const EthernetAddress& dst_ethernet_address = ETHERNET_BROADCAST );
+  void send_datagram_frame( const InternetDatagram& dgram, const EthernetAddress& dst_ethernet_address ) const;
+  void send_arp_frame( const ARPMessage& arp, const EthernetAddress& dst_ethernet_address = ETHERNET_BROADCAST ) const;
   auto make_arp(uint16_t opcode, 
     const EthernetAddress& sender_ethernet_address, const uint32_t sender_ip_address, 
-    const EthernetAddress& target_ethernet_address, const uint32_t target_ip_address) -> ARPMessage;
+    const EthernetAddress& target_ethernet_address, const uint32_t target_ip_address) const -> ARPMessage;
 
   struct DatagramWithTimeout {
     int64_t ts{};
@@ -89,8 +89,8 @@ private:
     std::vector<DatagramWithTimeout> dgramq{};
   };
 
-  static uint16_t MAPPING_CACHE_DURATION = 30000;
-  static uint16_t ARP_RESEND_TIMEOUT = 5000;
+  static const uint16_t MAPPING_CACHE_DURATION = 30000;
+  static const uint16_t ARP_RESEND_TIMEOUT = 5000;
 
   // Human-readable name of the interface
   std::string name_;
