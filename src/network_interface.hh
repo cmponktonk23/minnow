@@ -70,6 +70,24 @@ public:
 private:
   void send_datagram_frame( const InternetDatagram& dgram, const EthernetAddress& dst_ethernet_address );
   void send_arp_frame( const ARPMessage& arp, const EthernetAddress& dst_ethernet_address = ETHERNET_BROADCAST );
+  auto make_arp(uint16_t opcode, 
+    const EthernetAddress& sender_ethernet_address, const uint32_t sender_ip_address, 
+    const EthernetAddress& target_ethernet_address, const uint32_t target_ip_address) -> ARPMessage;
+
+  struct DatagramWithTimeout {
+    int64_t ts{};
+    InternetDatagram dgram{};
+  };
+
+  struct EthernetAddressWithTimeout {
+    int64_t ts{};
+    EthernetAddress ethernet_address{};
+  };
+
+  struct DatagramQueueWithTimeout {
+    int64_t ts{};
+    std::vector<DatagramWithTimeout> dgramq{};
+  };
 
   // Human-readable name of the interface
   std::string name_;
@@ -87,7 +105,7 @@ private:
   // Datagrams that have been received
   std::queue<InternetDatagram> datagrams_received_ {};
 
-  std::unordered_map<uint32_t, std::pair<int64_t, EthernetAddress>> ip_to_ethernet_{};
+  std::unordered_map<uint32_t, EthernetAddressWithTimeout> ip_to_ethernet_{};
 
-  std::unordered_map<uint32_t, std::pair<int64_t, std::vector<std::pair<int64_t, InternetDatagram>>>> ip_to_dgrams_{};
+  std::unordered_map<uint32_t, DatagramQueueWithTimeout> ip_to_dgrams_{};
 };
